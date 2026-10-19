@@ -1,0 +1,23 @@
+sr_prefixes:
+  - STH
+  - STP
+  - SFQ
+  - SWH
+  - SXM
+  - SBJ
+  - SQD
+
+message_table: ims_message
+required_locale: en_US
+
+llm_enabled: true
+ollama_url: http://localhost:11434
+llm_timeout_seconds: 30
+
+teams_webhook_url_env: TEAMS_WEBHOOK_URL
+
+browser_profile_dir: browser-profile
+login_timeout_seconds: 300
+
+teams_pacing_delay_ms: 500
+teams_max_retries: 3

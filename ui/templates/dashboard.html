@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Review Agent Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #333; margin-bottom: 20px; }
+        
+        /* Run header */
+        .run-header { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .run-header h2 { color: #333; margin-bottom: 10px; }
+        .run-meta { display: flex; gap: 20px; flex-wrap: wrap; }
+        .run-meta-item { display: flex; flex-direction: column; }
+        .run-meta-label { font-size: 12px; color: #666; text-transform: uppercase; }
+        .run-meta-value { font-size: 16px; font-weight: 500; color: #333; }
+        .state-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .state-queued { background: #e0e0e0; color: #666; }
+        .state-opening-sheet { background: #fff3e0; color: #e65100; }
+        .state-selecting-deploy-rows { background: #fff3e0; color: #e65100; }
+        .state-downloading-sql { background: #fff3e0; color: #e65100; }
+        .state-reviewing { background: #e3f2fd; color: #1565c0; }
+        .state-waiting-for-review { background: #fce4ec; color: #c2185b; }
+        .state-posting-to-teams { background: #e8eaf6; color: #3949ab; }
+        .state-done { background: #e8f5e9; color: #2e7d32; }
+        .state-waiting-for-login { background: #fff8e1; color: #f57f17; }
+        .state-failed { background: #ffebee; color: #c62828; }
+        
+        /* Start run form */
+        .start-run-form { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+        .form-group label { font-weight: 500; color: #333; }
+        .form-group input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .form-group button { padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .form-group button:hover { background: #1565c0; }
+        .form-group button:disabled { background: #90caf9; cursor: not-allowed; }
+        
+        /* File cards */
+        .file-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; }
+        .file-card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
+        .file-card-header { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .file-card-title { font-weight: 600; color: #333; }
+        .file-card-sr { font-size: 12px; color: #666; background: #f5f5f5; padding: 2px 8px; border-radius: 4px; }
+        .file-card-progress { padding: 10px 20px; border-bottom: 1px solid #eee; }
+        .progress-bar { height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #1976d2; border-radius: 3px; transition: width 0.3s; }
+        .progress-text { font-size: 12px; color: #666; margin-top: 5px; }
+        .file-card-log { padding: 10px 20px; border-bottom: 1px solid #eee; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #555; background: #fafafa; }
+        .log-entry { padding: 2px 0; border-bottom: 1px solid #eee; }
+        .log-entry:last-child { border-bottom: none; }
+        .log-time { color: #999; margin-right: 8px; }
+        .log-step { font-weight: 500; }
+        .log-status { margin-left: 8px; padding: 1px 6px; border-radius: 3px; font-size: 10px; text-transform: uppercase; }
+        .status-started { background: #fff3e0; color: #e65100; }
+        .status-completed { background: #e8f5e9; color: #2e7d32; }
+        .status-error { background: #ffebee; color: #c62828; }
+        .status-progress { background: #e3f2fd; color: #1565c0; }
+        
+        .file-card-findings { padding: 15px 20px; }
+        .finding { border: 1px solid #eee; border-radius: 6px; padding: 12px; margin-bottom: 10px; background: #fafafa; }
+        .finding-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .finding-severity { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .severity-error { background: #ffebee; color: #c62828; }
+        .severity-warning { background: #fff8e1; color: #f57f17; }
+        .severity-info { background: #e3f2fd; color: #1565c0; }
+        .finding-line { font-size: 12px; color: #666; }
+        .finding-title { font-weight: 600; color: #333; margin-bottom: 4px; }
+        .finding-description { font-size: 13px; color: #555; margin-bottom: 4px; }
+        .finding-recommendation { font-size: 13px; color: #1976d2; font-style: italic; margin-bottom: 8px; }
+        .finding-actions { display: flex; gap: 8px; }
+        .finding-actions button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; }
+        .btn-approve { background: #4caf50; color: white; }
+        .btn-edit { background: #1976d2; color: white; }
+        .btn-reject { background: #f44336; color: white; }
+        .btn-approve:disabled, .btn-edit:disabled, .btn-reject:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .dispatch-section { background: white; border-radius: 8px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .dispatch-btn { padding: 12px 24px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .dispatch-btn:hover { background: #1565c0; }
+        .dispatch-btn:disabled { background: #90caf9; cursor: not-allowed; }
+        
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 SQL Review Agent Dashboard</h1>
+        
+        <!-- Start Run Form -->
+        <div class="start-run-form" id="startRunForm">
+            <div class="form-group">
+                <label for="deployDate">Deploy Date (MM.DD):</label>
+                <input type="text" id="deployDate" placeholder="e.g., 10.13" pattern="\d{2}\.\d{2}" required>
+                <button id="startRunBtn" onclick="startRun()">Start Review</button>
+                <span id="runStatus" style="margin-left: 10px; color: #666;"></span>
+            </div>
+        </div>
+        
+        <!-- Run Header -->
+        <div class="run-header" id="runHeader" style="display: none;">
+            <h2 id="runTitle">Run #<span id="runId"></span></h2>
+            <div class="run-meta">
+                <div class="run-meta-item">
+                    <span class="run-meta-label">Deploy Date</span>
+                    <span class="run-meta-value" id="deployDateDisplay"></span>
+                </div>
+                <div class="run-meta-item">
+                    <span class="run-meta-label">SQL Files</span>
+                    <span class="run-meta-value" id="sqlFilesCount">0</span>
+                </div>
+                <div class="run-meta-item">
+                    <span class="run-meta-label">Findings</span>
+                    <span class="run-meta-value" id="findingsCount">0</span>
+                </div>
+                <div class="run-meta-item">
+                    <span class="run-meta-label">State</span>
+                    <span class="state-badge" id="stateBadge" id="stateBadge"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- File Cards -->
+        <div class="file-cards" id="fileCards">
+            <div class="empty-state" id="emptyState">No active run. Start a review by entering a deploy date above.</div>
+        </div>
+        
+        <!-- Dispatch Section -->
+        <div class="dispatch-section" id="dispatchSection" style="display: none;">
+            <button class="dispatch-btn" id="dispatchBtn" onclick="dispatchFindings()" disabled>📤 Dispatch Approved Findings to Teams</button>
+        </div>
+    </div>
+
+    <script>
+        let currentRunId = null;
+        let eventSource = null;
+        
+        const stateStyles = {
+            'Queued': 'state-queued',
+            'Opening sheet': 'state-opening-sheet',
+            'Selecting deploy rows': 'state-selecting-deploy-rows',
+            'Downloading SQL': 'state-downloading-sql',
+            'Reviewing': 'state-reviewing',
+            'Waiting for review': 'state-waiting-for-review',
+            'Posting to Teams': 'state-posting-to-teams',
+            'Done': 'state-done',
+            'Waiting for login': 'state-waiting-for-login',
+            'Failed': 'state-failed'
+        };
+        
+        async function startRun() {
+            const deployDate = document.getElementById('deployDate').value;
+            if (!deployDate) return;
+            
+            const btn = document.getElementById('startRunBtn');
+            btn.disabled = true;
+            btn.textContent = 'Starting...';
+            document.getElementById('runStatus').textContent = 'Initializing...';
+            
+            try {
+                const response = await fetch('/api/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `deploy_date=${encodeURIComponent(deployDate)}`
+                });
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                currentRunId = result.run_id;
+                showRunHeader(result);
+                connectSSE(result.run_id);
+                
+            } catch (error) {
+                document.getElementById('runStatus').textContent = `Error: ${error.message}`;
+                btn.disabled = false;
+                btn.textContent = 'Start Review';
+            }
+        }
+        
+        function showRunHeader(result) {
+            document.getElementById('runId').textContent = result.run_id;
+            document.getElementById('deployDateDisplay').textContent = result.deploy_date;
+            document.getElementById('sqlFilesCount').textContent = result.sql_files_count;
+            document.getElementById('findingsCount').textContent = result.findings_count;
+            updateStateBadge(result.state);
+            
+            document.getElementById('runHeader').style.display = 'block';
+            document.getElementById('startRunForm').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+        }
+        
+        function updateStateBadge(state) {
+            const badge = document.getElementById('stateBadge');
+            badge.textContent = state;
+            badge.className = 'state-badge ' + (stateStyles[state] || '');
+        }
+        
+        function connectSSE(runId) {
+            if (eventSource) eventSource.close();
+            
+            eventSource = new EventSource(`/api/run/${runId}/events`);
+            
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.final) {
+                    updateStateBadge(data.state);
+                    document.getElementById('dispatchSection').style.display = 'block';
+                    document.getElementById('dispatchBtn').disabled = false;
+                    eventSource.close();
+                    return;
+                }
+                
+                updateStateBadge(data.step);
+                addLogEntry(runId, data);
+            };
+            
+            eventSource.onerror = () => {
+                eventSource.close();
+            };
+        }
+        
+        function addLogEntry(runId, event) {
+            // Find or create log container for this run
+            let card = document.getElementById(`card-${runId}`);
+            if (!card) {
+                card = createFileCard(runId);
+            }
+            
+            const logContainer = card.querySelector('.log-container');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="log-time">${new Date(event.timestamp).toLocaleTimeString()}</span>
+                <span class="log-step">${event.step}</span>
+                <span class="log-status status-${event.status}">${event.status}</span>
+                ${event.message ? `<span style="margin-left: 8px; color: #888;">${event.message}</span>` : ''}
+            `;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        function createFileCard(runId) {
+            const container = document.getElementById('fileCards');
+            container.innerHTML = ''; // Clear empty state
+            
+            const card = document.createElement('div');
+            card.className = 'file-card';
+            card.id = `card-${runId}`;
+            card.innerHTML = `
+                <div class="file-card-header">
+                    <div>
+                        <span class="file-card-title">Run ${runId}</span>
+                    </div>
+                </div>
+                <div class="file-card-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-${runId}" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="progressText-${runId}">Initializing...</div>
+                </div>
+                <div class="log-container" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; padding: 10px 20px; background: #fafafa; border-bottom: 1px solid #eee;"></div>
+                <div class="file-card-findings" id="findings-${runId}"></div>
+            `;
+            container.appendChild(card);
+            return card;
+        }
+        
+        async function dispatchFindings() {
+            if (!currentRunId) return;
+            
+            const btn = document.getElementById('dispatchBtn');
+            btn.disabled = true;
+            btn.textContent = 'Dispatching...';
+            
+            try {
+                const response = await fetch(`/api/run/${currentRunId}/dispatch`, { method: 'POST' });
+                const result = await response.json();
+                alert(`Dispatch ${result.status}: ${JSON.stringify(result)}`);
+            } catch (error) {
+                alert(`Dispatch failed: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📤 Dispatch Approved Findings to Teams';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -16,6 +16,7 @@ Status legend: ✅ done and tested · 🟡 decided, not built · ❓ open questi
 
 - Database engine: **PostgreSQL**.
 - **No Docker or test database** (decided). Static checks only.
+- All Python dependencies must be installed and used through the project's `.venv`; do not install project dependencies into system Python.
 - The deploy sheet and the SQL files are on **kdocs.cn (WPS)** and **require login**.
 - Runs on the user's laptop.
 - The LLM is a **local model run through OpenCode** (decided), so script content is not sent to a cloud LLM.
@@ -276,7 +277,7 @@ sql-review-agent/
 └── events.db
 ```
 
-**Run the engine:** `pip install pglast`, then `python review_sql.py SQL_<SR>.sql [--json]`.
+**Run the engine:** create the environment with `py -m venv .venv`, install with `.venv/Scripts/python.exe -m pip install pglast`, then run `.venv/Scripts/python.exe review_sql.py SQL_<SR>.sql [--json]`.
 
 ---
 

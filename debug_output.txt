@@ -1,0 +1,21 @@
+before import
+Embedded SQL target table at line 8: ims_autocomplete_config
+    sval='users'
+    val.val=<String sval='users'>, type=<class 'pglast.ast.String'>
+  col 0 (table_name): type=<class 'pglast.ast.A_Const'>, val=<A_Const isnull=False val=<String sval='users'>>
+    sval='user_name'
+    val.val=<String sval='user_name'>, type=<class 'pglast.ast.String'>
+  col 1 (display_column): type=<class 'pglast.ast.A_Const'>, val=<A_Const isnull=False val=<String sval='user_name'>>
+    sval='select%20u.user_id%2C%20u.user_name%20from%20users%20u%20where%20u.active%20=%201%20and%20u.department_id%20=%20%24{departmentId}%20and%20u.user_id%20!=%20%24{currentUserId}'
+    val.val=<String sval='select%20u.user_id%2C%20u.user_name%20from%20users%20u%20where%20u.active%20=%201%20and%20u.department_id%20=%20%24{departmentId}%20and%20u.user_id%20!=%20%24{currentUserId}'>, type=<class 'pglast.ast.String'>
+  col 2 (where_clause): type=<class 'pglast.ast.A_Const'>, val=<A_Const isnull=False val=<String sval='select%20u.user_id%2C%20u.user_name%20from%20users%20u%20where%20u.active%20=%201%20and%20u.department_id%20=%20%24{departmentId}%20and%20u.user_id%20!=%20%24{currentUserId}'>>
+Embedded SQL target table at line 12: ims_report_config
+    sval='RPT.INVENTORY'
+    val.val=<String sval='RPT.INVENTORY'>, type=<class 'pglast.ast.String'>
+  col 0 (report_key): type=<class 'pglast.ast.A_Const'>, val=<A_Const isnull=False val=<String sval='RPT.INVENTORY'>>
+    sval='select%20i.item_code%2C%20i.item_name%2C%20bw.u.wu_id%2C%20bu.wu_code%2C%20bu.wu_name%20from%20inventory%20i%20join%20warehouse%20w%20on%20i.warehouse_id%20=%20w.warehouse_id%20join%20batch_warn%20bw%20on%20bw.warehouse_id%20=%20w.warehouse_id%20where%20i.status%20=%20%27%27active%27%27'
+    val.val=<String sval='select%20i.item_code%2C%20i.item_name%2C%20bw.u.wu_id%2C%20bu.wu_code%2C%20bu.wu_name%20from%20inventory%20i%20join%20warehouse%20w%20on%20i.warehouse_id%20=%20w.warehouse_id%20join%20batch_warn%20bw%20on%20bw.warehouse_id%20=%20w.warehouse_id%20where%20i.status%20=%20%27%27active%27%27'>, type=<class 'pglast.ast.String'>
+  col 1 (query_sql): type=<class 'pglast.ast.A_Const'>, val=<A_Const isnull=False val=<String sval='select%20i.item_code%2C%20i.item_name%2C%20bw.u.wu_id%2C%20bu.wu_code%2C%20bu.wu_name%20from%20inventory%20i%20join%20warehouse%20w%20on%20i.warehouse_id%20=%20w.warehouse_id%20join%20batch_warn%20bw%20on%20bw.warehouse_id%20=%20w.warehouse_id%20where%20i.status%20=%20%27%27active%27%27'>>
+Error: syntax error at or near "INSERT", at index 46
+Error: syntax error at or near ";", at index 45
+Error: syntax error at or near "s", at index 101

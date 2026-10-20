@@ -29,6 +29,11 @@ class ReviewPipeline:
 
     def run(self, deploy_date: str) -> PipelineResult:
         """Execute the full review pipeline for a deploy date."""
+        # Validate deploy date format (MM.DD)
+        import re
+        if not re.match(r"^\d{2}\.\d{2}$", deploy_date):
+            raise ValueError(f"Invalid deploy date format: {deploy_date}. Expected MM.DD")
+        
         run_id = create_run(deploy_date)
         
         try:

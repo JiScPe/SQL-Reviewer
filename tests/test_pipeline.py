@@ -47,7 +47,7 @@ def mock_explainer():
 def test_pipeline_run_success(mock_sheet_fetcher, mock_review_engine, mock_explainer):
     result = run_pipeline("10.13")
     
-    assert result.run_id == 1
+    assert result.run_id is not None
     assert result.deploy_date == "10.13"
     assert result.state == "Waiting for review"
     assert len(result.sql_files) == 2

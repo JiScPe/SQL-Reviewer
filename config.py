@@ -17,6 +17,8 @@ class Config:
     login_timeout_seconds: int
     teams_pacing_delay_ms: int
     teams_max_retries: int
+    kdocs_base_url: str
+    kdocs_sheet_url: str
 
 
 def load_config(path: str = "config.yaml") -> Config:
@@ -34,6 +36,8 @@ def load_config(path: str = "config.yaml") -> Config:
         login_timeout_seconds=data["login_timeout_seconds"],
         teams_pacing_delay_ms=data["teams_pacing_delay_ms"],
         teams_max_retries=data["teams_max_retries"],
+        kdocs_base_url=data.get("kdocs_base_url", "https://www.kdocs.cn"),
+        kdocs_sheet_url=data.get("kdocs_sheet_url", "https://www.kdocs.cn"),
     )
 
 

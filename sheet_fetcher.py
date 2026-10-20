@@ -75,8 +75,8 @@ class SheetFetcher:
 
     def _navigate_and_wait_for_login(self, run_id: int):
         """Navigate to kdocs and wait for login if needed."""
-        self.page.goto("https://www.kdocs.cn")
-        add_event(run_id, "Opening sheet", "progress", "Navigated to kdocs.cn")
+        self.page.goto(self.config.kdocs_sheet_url)
+        add_event(run_id, "Opening sheet", "progress", f"Navigated to {self.config.kdocs_base_url}")
         
         # Wait for either login page or sheet to be visible
         login_detected = False

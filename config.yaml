@@ -11,7 +11,7 @@ message_table: ims_message
 required_locale: en_US
 
 llm_enabled: true
-ollama_url: http://localhost:11434
+ollama_url: http://127.0.0.1:4096
 llm_timeout_seconds: 30
 
 teams_webhook_url_env: TEAMS_WEBHOOK_URL
@@ -21,3 +21,7 @@ login_timeout_seconds: 300
 
 teams_pacing_delay_ms: 500
 teams_max_retries: 3
+
+# kdocs/WPS configuration
+kdocs_base_url: https://www.kdocs.cn
+kdocs_sheet_url: https://www.kdocs.cn/l/ct8mpq8xZleB
